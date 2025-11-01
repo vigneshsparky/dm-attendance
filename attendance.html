@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Attendance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #4b6cb7;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #4b6cb7;
+            outline: none;
+        }
+
+        button {
+            background: #4b6cb7;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #3a5999;
+        }
+
+        .present-btn {
+            background: #28a745;
+            font-size: 18px;
+            padding: 15px 30px;
+            display: block;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .present-btn:hover {
+            background: #218838;
+        }
+
+        .disabled-btn {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .disabled-btn:hover {
+            background: #6c757d;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .attendance-record {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .attendance-record:last-child {
+            border-bottom: none;
+        }
+
+        .date {
+            font-weight: 600;
+        }
+
+        .time {
+            color: #666;
+        }
+
+        .distance-indicator {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .distance-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .in-range {
+            background: #28a745;
+        }
+
+        .out-of-range {
+            background: #dc3545;
+        }
+
+        .admin-section {
+            background: #f8f9fa;
+            border-left: 4px solid #4b6cb7;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Office Attendance System</h1>
+            <p>Mark your attendance with location verification</p>
+        </header>
+
+        <div class="grid">
+            <!-- User Registration Section -->
+            <div class="card">
+                <h2>Employee Registration</h2>
+                <div id="registration-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" placeholder="Enter your position">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email">
+                    </div>
+                    <button id="register-btn">Register</button>
+                </div>
+                <div id="registration-message" class="status-message" style="display: none;"></div>
+            </div>
+
+            <!-- Attendance Section -->
+            <div class="card">
+                <h2>Mark Attendance</h2>
+                <div id="user-info" style="display: none;">
+                    <p><strong>Welcome, </strong><span id="user-name"></span></p>
+                    <p><strong>Position: </strong><span id="user-position"></span></p>
+                </div>
+                
+                <div id="location-status" class="status-message warning">
+                    Getting your location...
+                </div>
+                
+                <div class="distance-indicator">
+                    <div id="distance-circle" class="distance-circle"></div>
+                    <span id="distance-text">Calculating distance to office...</span>
+                </div>
+                
+                <button id="present-btn" class="present-btn disabled-btn" disabled>Mark Present</button>
+                
+                <div id="attendance-message" class="status-message" style="display: none;"></div>
+            </div>
+
+            <!-- Attendance History -->
+            <div class="card">
+                <h2>Your Attendance History</h2>
+                <div class="form-group">
+                    <label for="month-select">Select Month</label>
+                    <select id="month-select">
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                </div>
+                <div id="attendance-history">
+                    <p class="info status-message">Select a month to view your attendance</p>
+                </div>
+            </div>
+
+            <!-- Admin Section -->
+            <div class="card admin-section">
+                <h2>Admin Panel</h2>
+                <div class="form-group">
+                    <label for="admin-month-select">Select Month</label>
+                    <select id="admin-month-select">
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                </div>
+                
+                <div class="admin-controls">
+                    <button id="view-users-btn">View All Users</button>
+                    <button id="download-report-btn">Download Monthly Report</button>
+                </div>
+                
+                <div id="admin-results" style="margin-top: 20px;">
+                    <div id="users-list" class="user-list" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Office Attendance System &copy; 2023 | Office Location: 10.747788362232939, 79.11986441421183</p>
+        </footer>
+    </div>
+
+    <script>
+        // Office coordinates
+        const OFFICE_LAT = 10.747788362232939;
+        const OFFICE_LNG = 79.11986441421183;
+        const MAX_DISTANCE = 10; // meters
+
+        // DOM Elements
+        const registrationForm = document.getElementById('registration-form');
+        const registerBtn = document.getElementById('register-btn');
+        const registrationMessage = document.getElementById('registration-message');
+        
+        const userInfo = document.getElementById('user-info');
+        const userName = document.getElementById('user-name');
+        const userPosition = document.getElementById('user-position');
+        
+        const locationStatus = document.getElementById('location-status');
+        const distanceCircle = document.getElementById('distance-circle');
+        const distanceText = document.getElementById('distance-text');
+        const presentBtn = document.getElementById('present-btn');
+        const attendanceMessage = document.getElementById('attendance-message');
+        
+        const monthSelect = document.getElementById('month-select');
+        const attendanceHistory = document.getElementById('attendance-history');
+        
+        const adminMonthSelect = document.getElementById('admin-month-select');
+        const viewUsersBtn = document.getElementById('view-users-btn');
+        const downloadReportBtn = document.getElementById('download-report-btn');
+        const usersList = document.getElementById('users-list');
+        const adminResults = document.getElementById('admin-results');
+
+        // State variables
+        let currentUser = null;
+        let userLocation = null;
+        let distanceToOffice = null;
+        let isInRange = false;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already registered
+            checkUserRegistration();
+            
+            // Set current month in selectors
+            const currentMonth = new Date().getMonth();
+            monthSelect.value = currentMonth;
+            adminMonthSelect.value = currentMonth;
+            
+            // Load attendance history for current user
+            if (currentUser) {
+                loadAttendanceHistory();
+            }
+            
+            // Request location permission
+            getLocation();
+            
+            // Event listeners
+            registerBtn.addEventListener('click', registerUser);
+            presentBtn.addEventListener('click', markAttendance);
+            monthSelect.addEventListener('change', loadAttendanceHistory);
+            viewUsersBtn.addEventListener('click', viewAllUsers);
+            downloadReportBtn.addEventListener('click', downloadMonthlyReport);
+        });
+
+        // Check if user is already registered
+        function checkUserRegistration() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                displayUserInfo();
+            }
+        }
+
+        // Display user information
+        function displayUserInfo() {
+            userInfo.style.display = 'block';
+            userName.textContent = currentUser.name;
+            userPosition.textContent = currentUser.position;
+        }
+
+        // Register a new user
+        function registerUser() {
+            const name = document.getElementById('name').value.trim();
+            const position = document.getElementById('position').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!name || !position || !email) {
+                showMessage(registrationMessage, 'Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showMessage(registrationMessage, 'Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Save user to localStorage
+            currentUser = {
+                name,
+                position,
+                email,
+                id: generateId()
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Save to users list
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userExists = users.some(user => user.email === email);
+            
+            if (!userExists) {
+                users.push(currentUser);
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            showMessage(registrationMessage, 'Registration successful!', 'success');
+            displayUserInfo();
+            
+            // Clear form
+            document.getElementById('name').value = '';
+            document.getElementById('position').value = '';
+            document.getElementById('email').value = '';
+            
+            // Load attendance history
+            loadAttendanceHistory();
+        }
+
+        // Get user's current location
+        function getLocation() {
+            if (!navigator.geolocation) {
+                showMessage(locationStatus, 'Geolocation is not supported by this browser', 'error');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Calculate distance to office
+                    distanceToOffice = calculateDistance(
+                        userLocation.lat, userLocation.lng,
+                        OFFICE_LAT, OFFICE_LNG
+                    );
+                    
+                    // Update UI based on distance
+                    updateLocationUI(distanceToOffice);
+                },
+                error => {
+                    let errorMessage = 'Unable to retrieve your location';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location access denied. Please enable location services.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information is unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out.';
+                            break;
+                    }
+                    
+                    showMessage(locationStatus, errorMessage, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+
+        // Calculate distance between two coordinates using Haversine formula
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371000; // Earth's radius in meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+            
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            
+            return distance;
+        }
+
+        // Update UI based on distance to office
+        function updateLocationUI(distance) {
+            isInRange = distance <= MAX_DISTANCE;
+            
+            if (isInRange) {
+                distanceCircle.className = 'distance-circle in-range';
+                distanceText.textContent = `You are ${distance.toFixed(2)} meters from office (Within range)`;
+                showMessage(locationStatus, 'You are within the office range. You can mark attendance.', 'success');
+                
+                if (currentUser) {
+                    presentBtn.disabled = false;
+                    presentBtn.className = 'present-btn';
+                }
+            } else {
+                distanceCircle.className = 'distance-circle out-of-range';
+                distanceText.textContent = `You are ${distance.toFixed(2)} meters from office (Out of range)`;
+                showMessage(locationStatus, `You are too far from the office. Please come within ${MAX_DISTANCE} meters to mark attendance.`, 'error');
+                
+                presentBtn.disabled = true;
+                presentBtn.className = 'present-btn disabled-btn';
+            }
+        }
+
+        // Mark attendance
+        function markAttendance() {
+            if (!currentUser) {
+                showMessage(attendanceMessage, 'Please register first', 'error');
+                return;
+            }
+            
+            if (!isInRange) {
+                showMessage(attendanceMessage, 'You are not within the office range', 'error');
+                return;
+            }
+            
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0];
+            
+            // Save attendance record
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            
+            // Check if already marked today
+            const alreadyMarked = attendance.some(record => 
+                record.userId === currentUser.id && record.date === dateStr
+            );
+            
+            if (alreadyMarked) {
+                showMessage(attendanceMessage, 'Attendance already marked for today', 'warning');
+                return;
+            }
+            
+            // Add new record
+            attendance.push({
+                userId: currentUser.id,
+                userName: currentUser.name,
+                userEmail: currentUser.email,
+                userPosition: currentUser.position,
+                date: dateStr,
+                time: timeStr,
+                location: userLocation,
+                distance: distanceToOffice
+            });
+            
+            localStorage.setItem('attendance', JSON.stringify(attendance));
+            
+            showMessage(attendanceMessage, `Attendance marked successfully at ${timeStr}`, 'success');
+            
+            // Reload attendance history
+            loadAttendanceHistory();
+        }
+
+        // Load attendance history for current user
+        function loadAttendanceHistory() {
+            if (!currentUser) {
+                attendanceHistory.innerHTML = '<p class="info status-message">Please register to view your attendance history</p>';
+                return;
+            }
+            
+            const selectedMonth = parseInt(monthSelect.value);
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            
+            // Filter by user and month
+            const userAttendance = attendance.filter(record => {
+                if (record.userId !== currentUser.id) return false;
+                
+                const recordDate = new Date(record.date);
+                return recordDate.getMonth() === selectedMonth;
+            });
+            
+            if (userAttendance.length === 0) {
+                attendanceHistory.innerHTML = '<p class="info status-message">No attendance records found for this month</p>';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            userAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Display records
+            let html = '';
+            userAttendance.forEach(record => {
+                const date = new Date(record.date);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                html += `
+                    <div class="attendance-record">
+                        <div>
+                            <span class="date">${formattedDate}</span>
+                        </div>
+                        <div>
+                            <span class="time">${record.time}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            attendanceHistory.innerHTML = html;
+        }
+
+        // View all registered users
+        function viewAllUsers() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<p class="info status-message">No users registered yet</p>';
+                usersList.style.display = 'block';
+                return;
+            }
+            
+            let html = '';
+            users.forEach(user => {
+                html += `
+                    <div class="user-item">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <span>${user.position} | ${user.email}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            usersList.innerHTML = html;
+            usersList.style.display = 'block';
+        }
+
+        // Download monthly report as CSV
+        function downloadMonthlyReport() {
+            const selectedMonth = parseInt(adminMonthSelect.value);
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            
+            // Filter by month
+            const monthlyAttendance = attendance.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate.getMonth() === selectedMonth;
+            });
+            
+            if (monthlyAttendance.length === 0) {
+                alert('No attendance records found for this month');
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = 'Name,Email,Position,Date,Time,Distance (m)\n';
+            
+            monthlyAttendance.forEach(record => {
+                csvContent += `"${record.userName}","${record.userEmail}","${record.userPosition}","${record.date}","${record.time}","${record.distance.toFixed(2)}"\n`;
+            });
+            
+            // Create and trigger download
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `attendance_report_${new Date().getFullYear()}_${selectedMonth + 1}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Utility functions
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `status-message ${type}`;
+            element.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function generateId() {
+            return 'user_' + Math.random().toString(36).substr(2, 9);
+        }
+    </script>
+</body>
+</html>
